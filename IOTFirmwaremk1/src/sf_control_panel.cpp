@@ -474,6 +474,10 @@ void drawManualConfirm() {
   clearAndPrint4("Confirm Feed", String(b), "C=Yes", "D=Back");
 }
 
+void drawManualFeedInvalid() {
+  clearAndPrint4("Feed value invalid,", "Insufficient feeds", "", "D=Back");
+}
+
 void drawFeedingProgress() {
   unsigned long elapsed = millis() - gFeedingStartedMs;
   float pct = (gFeedingDurationMs > 0) ? ((100.0f * elapsed) / (float)gFeedingDurationMs) : 100.0f;
@@ -693,7 +697,13 @@ void handleManualConfirmKey(char key, JsonVariant cfg) {
     gPrevState = gState;
   } else {
     LOG_WARN("UI manual feed blocked: insufficient unreserved feed");
-    transition(STATE_MANUAL_FEED_CONFIRM);
+    transition(STATE_MANUAL_FEED_INVALID);
+  }
+}
+
+void handleManualFeedInvalidKey(char key) {
+  if (key == 'D') {
+    transition(STATE_MANUAL_FEED_INPUT);
   }
 }
 
@@ -915,6 +925,9 @@ void drawCurrent(JsonVariant cfg, JsonArray schedules) {
     case STATE_MANUAL_FEED_CONFIRM:
       drawManualConfirm();
       break;
+    case STATE_MANUAL_FEED_INVALID:
+      drawManualFeedInvalid();
+      break;
     case STATE_FEEDING_PROGRESS:
       drawFeedingProgress();
       break;
@@ -966,6 +979,9 @@ void handleStateKey(char key, JsonVariant cfg, JsonArray schedules) {
       break;
     case STATE_MANUAL_FEED_CONFIRM:
       handleManualConfirmKey(key, cfg);
+      break;
+    case STATE_MANUAL_FEED_INVALID:
+      handleManualFeedInvalidKey(key);
       break;
     case STATE_FEEDING_PROGRESS:
       handleFeedingProgressKey(key);
